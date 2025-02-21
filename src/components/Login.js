@@ -4,14 +4,18 @@ import { checkValidateData } from "../utils/validate";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  updateProfile,
 } from "firebase/auth";
 import { auth } from "../utils/firebase";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { addUser } from "../utils/userSlice";
+import { useDispatch } from "react-redux";
 
 const Login = () => {
   const [isSignInFrom, setIsSignInForm] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const email = useRef(null);
   const password = useRef(null);
@@ -37,7 +41,20 @@ const Login = () => {
       )
         .then((userCredential) => {
           const user = userCredential.user;
-          navigate("/browse");
+          updateProfile(user, {
+            displayName: name.current.value , photoURL: "https://occ-0-977-2598.1.nflxso.net/dnm/api/v6/vN7bi_My87NPKvsBoib006Llxzg/AAAABd83-oUZ_FuowwvYTYbAzwxlU6ukAhqTl_1p6wfqPR7ZWY-6htUyNi7AxDqttSFZgJTKnd2coLzxF4VN-9cxMhY4X_ZYdhg.png?r=dd4"
+          }).then(() => {
+            const {uid, email, displayName, photoURL} = auth.currentUser;
+            dispatch(addUser({
+                uid: uid,
+                email: email,
+                displayName: displayName,
+                photoURL: photoURL
+            }))
+            navigate("/browse");
+          }).catch((error) => {
+            setErrorMessage(error.errorMessage);
+          });
         })
         .catch((error) => {
           const errorCode = error.code;
